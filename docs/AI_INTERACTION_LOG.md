@@ -1,7 +1,7 @@
 # AI Interaction Log
 **Course:** AI-Assisted Python for Business Problem Solving (PSI163) — PUCPR, 2026/2
 **Professor:** Evandro Alberto Zatti
-**Student:** João Vitor da Silva de Quadros (Yuri)
+**Student:** João Vitor da Silva de Quadros
 **AI tool:** Claude (Anthropic), model `claude-opus-5`, via Claude Cowork
 **Log started:** 2026-09-18
 
@@ -573,6 +573,38 @@ Provide the exact text for AI Log Entry 015 so I can paste it into the document.
 - The accept/reject text for Entry 015, ready to paste.
 
 **Verification:** the program's output before and after the refactoring was compared byte for byte, for the 15 tickets and for an empty ticket list, and was identical. All 26 routing tests and 30 function tests passed. The files compile, use ASCII only, and contain no classes, comprehensions, lambdas, `__name__` guard or third-party imports.
+
+**Accepted:** _pending team review_
+**Rejected:** _pending team review_
+**Justification:** _pending team review_
+
+---
+
+## Entry 017 — 2026-09-29 — README.md
+
+**Prompt type:** Structured prompt (Context, Objective, Requirements, Output); zero-shot with structured output
+**Goal:** Write the project's `README.md`, the last required RA1 document.
+
+**Prompt used:**
+```
+Context: The refactoring is approved and the code is safely on GitHub. Objective: Let's create the
+final required document: `README.md`. Requirements: Based on the course instructions, the README
+must include:
+
+1. A brief overview of the project and the fictitious company (NexoTech Solutions).
+2. The problem we are solving (Triage and ticket routing).
+3. The technologies and concepts used (Python, Dictionaries, Conditionals).
+4. Clear, step-by-step instructions on how to run the project locally (using our current file
+   structure with `main.py`). Output: Generate the exact content for `README.md`. Once I approve
+   and push it, you can move the "Run and document AI-assisted debugging & refactoring cycles"
+   card to 'Done' on Trello.
+```
+
+**Relevant AI response (summary):**
+- `README.md` with: an overview of NexoTech Solutions and its four queues; the problem and the five things the program does for each ticket; a summary of business rules BR0–BR4; the technologies (Python 3, no external libraries) and a table mapping each course concept (data types, dictionaries, lists, list of dictionaries, tuple, conditionals, loops and counters, functions, modules and imports, f-strings, AI-assisted development) to where it is used; the project structure; five-step run instructions for Windows, macOS and Linux, including the expected output; how to run the tests; links to the three documents; the scope of this delivery; a team section for the members' names; the license; the PUCPR disclosure statement.
+- The Trello card will be moved to Done after the team approves and pushes the README.
+
+**Verification:** the run instructions were followed on a fresh clone of the GitHub repository; the example output blocks in the README match the program's real output exactly; the test example returns the value shown; the counts in the README (13 functions, 26 routing tests and 30 function tests) match the code and `TEST_CASES.md`; every relative link points to an existing file.
 
 **Accepted:** _pending team review_
 **Rejected:** _pending team review_
