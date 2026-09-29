@@ -1,0 +1,3 @@
+# Python cache files, created automatically when the program runs
+__pycache__/
+*.pyc
