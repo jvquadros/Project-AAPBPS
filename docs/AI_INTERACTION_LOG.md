@@ -374,3 +374,31 @@ Pandas and Supabase cards. Objective for this prompt:
 **Justification:** _pending team review_
 
 ---
+
+## Entry 012 — 2026-09-29 — Checking the GitHub repository after the first push
+
+**Prompt type:** Zero-shot, verification request (tool use: git clone of the public repository; connected project folder)
+**Goal:** Confirm that the push worked and that nothing from the recent work is missing on GitHub.
+
+**Prompt used:**
+```
+Context: I just successfully pushed my local files to our GitHub repository. Objective: Please
+access the repository at `[https://github.com/jvquadros/Project-AAPBPS](https://github.com/jvquadros/Project-AAPBPS)`
+and validate its current state. Expected Output: Confirm if the push was successful, list the
+files currently present in the `main` branch, and let me know if anything seems to be missing
+based on our recent work (Python files, docs, AI log, and .gitignore).
+```
+
+**Relevant AI response (summary):**
+- The push worked. `main` has 3 commits: GitHub's initial commit (Python `.gitignore` template and MIT `LICENSE`), the project commit, and a commit resolving the `.gitignore` merge conflict.
+- Files on `main`: `.gitignore`, `LICENSE`, `main.py`, `calculations.py`, `validations.py`, `docs/PROBLEM_ANALYSIS.md`, `docs/TEST_CASES.md`, `docs/AI_INTERACTION_LOG.md`. The six project files are byte-for-byte identical to the local versions, no cache files were committed, and `main.py` runs from a fresh clone with the expected summary.
+- Problems found:
+  - `.gitignore` still contains the merge-conflict markers (`<<<<<<< HEAD`, `=======`, `>>>>>>>`), so the conflict was committed rather than resolved. The AI replaced the local file with GitHub's Python template, which already ignores `__pycache__/` and `*.pyc`, and checked that the cache folder is still ignored.
+  - The conflict commit message is in Portuguese; the project rule is English for commit messages.
+  - `README.md` does not exist yet; it is required for the RA1 delivery.
+
+**Accepted:** _pending team review_
+**Rejected:** _pending team review_
+**Justification:** _pending team review_
+
+---

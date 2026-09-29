@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# Python cache files, created automatically when the program runs
-__pycache__/
-*.pyc
-=======
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -221,4 +216,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
->>>>>>> 947fb3d7410a722642e4508ee2a0fcb9791f91b6
