@@ -1,14 +1,16 @@
 # calculations.py
-# Business rules for NexoTech Solutions ticket routing (BR1 to BR4).
+# Business rules for NexoTech Solutions ticket routing (BR1 to BR4), plus the
+# percentage calculation used in the end-of-run summary.
 # These functions only calculate and return results. They never print and
 # never create or read ticket data, so each rule can be tested on its own.
 #
 # AI disclosure (PUCPR Resolution 274/2024): During the preparation of this code,
 # the author(s) used Claude (Anthropic, model claude-opus-5) to implement the
-# team's routing and deadline rules (BR1 to BR4) as functions, and to apply the
-# corrections the team accepted in the AI debugging cycle (AI log Entry 013).
-# After using this tool, the author(s) reviewed and edited the content as needed
-# and take full responsibility for the content.
+# team's routing and deadline rules (BR1 to BR4) as functions, to apply the
+# corrections the team accepted in the AI debugging cycle (AI log Entry 013),
+# and to add calculate_percentage() in the AI refactoring cycle (AI log
+# Entry 015). After using this tool, the author(s) reviewed and edited the
+# content as needed and take full responsibility for the content.
 
 from validations import clean_text
 
@@ -86,3 +88,13 @@ def route_ticket(category, priority):
         status = STATUS_ROUTED
 
     return {"queue": queue, "deadline_hours": deadline_hours, "status": status}
+
+
+def calculate_percentage(count, total):
+    """Return count as a percentage of total (for example 3 of 15 -> 20.0).
+
+    Returns 0.0 when total is 0, to avoid a division by zero.
+    """
+    if total == 0:
+        return 0.0
+    return count / total * 100

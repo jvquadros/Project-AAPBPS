@@ -5,7 +5,7 @@
 | Project | Ticket routing system for NexoTech Solutions |
 | Course | AI-Assisted Python for Business Problem Solving (PSI163), PUCPR, 2026/2 |
 | Indicator | ID1.1: analyze an organizational problem, identify inputs, processing and outputs, and decompose it into logical steps |
-| Version | 1.2, 2026-09-29 (v1.0 approved by the team; v1.1 adds BR0; v1.2 marks unknown categories for review; see section 7) |
+| Version | 1.3, 2026-09-29 (v1.0 approved by the team; v1.1 adds BR0; v1.2 marks unknown categories for review; v1.3 notes where the sample tickets live; see section 7) |
 
 ---
 
@@ -192,7 +192,7 @@ END
 
 1. The **category** comes with the ticket; the requester chooses it when opening the ticket. In this phase the system does not check the category against the description text.
 2. Deadlines are **counted in hours from the moment the ticket is opened**. Turning them into an exact due date and time is outside this phase.
-3. The tickets processed in this phase are a **small synthetic sample**: a list of dictionaries defined in `main.py`. There is no database or external data source.
+3. The tickets processed in this phase are a **small synthetic sample**: a list of dictionaries defined in `sample_tickets.py` and processed by `main.py`. There is no database or external data source.
 
 ---
 
@@ -203,6 +203,7 @@ END
 | 1.0 | 2026-09-29 | First version. Approved by the team, including BR3, BR4, the status field, the end-of-run summary and the single-ticket pseudocode. |
 | 1.1 | 2026-09-29 | Added BR0 (input cleaning): capitalization and surrounding spaces are ignored. Pseudocode, IPO table and decomposition updated to match. Team decision. |
 | 1.2 | 2026-09-29 | BR3 now marks an unrecognized category "Needs review"; BR0 also covers a field that is absent from the ticket. Pseudocode, decomposition and status rule updated. Team decisions from the AI debugging cycle (AI log Entry 013). |
+| 1.3 | 2026-09-29 | Assumption 3 updated: the sample tickets now live in `sample_tickets.py` (AI refactoring cycle, AI log Entry 015). No business rule changed. |
 
 ---
 

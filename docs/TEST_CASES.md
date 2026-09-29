@@ -6,8 +6,8 @@
 | Course | AI-Assisted Python for Business Problem Solving (PSI163), PUCPR, 2026/2 |
 | Indicator | ID1.2: conditional structures, repetition and functions, tested with different input values |
 | Based on | `docs/PROBLEM_ANALYSIS.md` v1.2, business rules BR0 to BR4 |
-| Code under test | `validations.py` → `clean_text()`, `is_missing()`; `calculations.py` → `get_queue()`, `get_deadline_hours()`, `route_ticket()`; `main.py` for the summary |
-| Version | 1.2, 2026-09-29 (see section 8) |
+| Code under test | `validations.py` → `clean_text()`, `is_missing()`; `calculations.py` → `get_queue()`, `get_deadline_hours()`, `route_ticket()`, `calculate_percentage()`; `main.py` → `format_deadline()` and the end-of-run summary (tickets from `sample_tickets.py`) |
+| Version | 1.3, 2026-09-29 (see section 8) |
 
 ---
 
@@ -30,9 +30,11 @@
 2. Import the functions once:
    ```
    >>> from validations import clean_text, is_missing
-   >>> from calculations import get_queue, get_deadline_hours, route_ticket
+   >>> from calculations import get_queue, get_deadline_hours, route_ticket, calculate_percentage
+   >>> from main import format_deadline
    ```
-3. For each test, call the function with that test's input, exactly as written in the table. Write `None` without quotes for a missing value, and `""` for empty text. For example, with an input that is not in the tables:
+   The last import runs the whole program once and prints its output first. That is expected: `main.py` calls `main()` at the end. After that, `format_deadline()` is ready to test.
+3. For each test, call the function with that test's input, exactly as written in the table. When a row shows two inputs (`calculate_percentage()`), pass them in that order, e.g. `calculate_percentage(3, 15)`. Write `None` without quotes for a missing value, and `""` for empty text. For example, with an input that is not in the tables:
    ```
    >>> route_ticket("Software", "HIGH")
    {'queue': 'L1 Helpdesk', 'deadline_hours': 4, 'status': 'Routed'}
@@ -106,6 +108,15 @@ The course asks for every function to be tested with different input values. The
 | FT19 | `get_deadline_hours()` | Low, uppercase with spaces | `" LOW "` | `72` | | |
 | FT20 | `get_deadline_hours()` | Priority not in the list | `"Urgent"` | `0` | | |
 | FT21 | `get_deadline_hours()` | Missing priority | `None` | `0` | | |
+| FT22 | `format_deadline()` | High-priority deadline | `4` | `"4 hours"` | | |
+| FT23 | `format_deadline()` | Medium-priority deadline | `24` | `"24 hours"` | | |
+| FT24 | `format_deadline()` | Low-priority deadline | `72` | `"72 hours"` | | |
+| FT25 | `format_deadline()` | No deadline set (BR4) | `0` | `"not set (priority must be reviewed)"` | | |
+| FT26 | `calculate_percentage()` | Part of the total | `3, 15` | `20.0` | | |
+| FT27 | `calculate_percentage()` | Largest queue in the sample | `6, 15` | `40.0` | | |
+| FT28 | `calculate_percentage()` | All tickets in one queue | `15, 15` | `100.0` | | |
+| FT29 | `calculate_percentage()` | Queue with no tickets | `0, 15` | `0.0` | | |
+| FT30 | `calculate_percentage()` | Empty ticket list (total 0, no division by zero) | `0, 0` | `0.0` | | |
 
 ---
 
@@ -132,6 +143,8 @@ The course asks for each business rule to be tested with at least three differen
 | `get_queue()` | FT09 to FT16 | Every TC test |
 | `get_deadline_hours()` | FT17 to FT21 | Every TC test |
 | `route_ticket()` | TC01 to TC26 | `main.py` run (section 5) |
+| `format_deadline()` | FT22 to FT25 | `main.py` output ("Deadline:" lines) |
+| `calculate_percentage()` | FT26 to FT30 | `main.py` summary percentages (section 5) |
 
 ### 4.3 Queue × priority
 
@@ -148,7 +161,7 @@ Every queue is tested with every priority.
 
 ## 5. End-of-run summary check (`main.py`)
 
-`main.py` processes 15 synthetic tickets (IDs 1001 to 1015). Ticket 1015 has no `description` and no `priority` key at all. After `python main.py`, the output must show:
+`main.py` processes the 15 synthetic tickets in `sample_tickets.py` (IDs 1001 to 1015). Ticket 1015 has no `description` and no `priority` key at all. After `python main.py`, the output must show:
 
 | Check | Expected | Tickets | Actual | Passed |
 |---|---|---|---|---|
@@ -189,7 +202,8 @@ Fill in one row per failed test. After the fix, re-run the test and record the r
 | 1.0 | 2026-09-29 | First version (22 tests). |
 | 1.1 | 2026-09-29 | Supabase removed; capitalization ignored (BR0); 26 tests; summary check based on `main.py`. |
 | 1.2 | 2026-09-29 | Corrections accepted in the AI debugging cycle (AI log Entry 013): TC19 to TC21 now expect "Needs review" (BR3); 21 direct function tests added (FT01 to FT21); summary check updated for 15 tickets, including ticket 1015 without a description or priority key. |
+| 1.3 | 2026-09-29 | AI refactoring cycle (AI log Entry 015): 9 direct tests added for the new functions `format_deadline()` (FT22 to FT25) and `calculate_percentage()` (FT26 to FT30); the sample tickets now come from `sample_tickets.py`. All other expected results are unchanged, because the refactoring did not change the program's behavior. |
 
 ---
 
-*During the preparation of this document, the author(s) used Claude (Anthropic, model claude-opus-5) to derive the test cases, coverage tables and run procedure from the team's business rules (BR0 to BR4), and to update them after the AI debugging cycle. After using this tool, the author(s) reviewed and edited the content as needed and take full responsibility for the content.*
+*During the preparation of this document, the author(s) used Claude (Anthropic, model claude-opus-5) to derive the test cases, coverage tables and run procedure from the team's business rules (BR0 to BR4), to update them after the AI debugging cycle, and to add tests for the functions created in the AI refactoring cycle. After using this tool, the author(s) reviewed and edited the content as needed and take full responsibility for the content.*

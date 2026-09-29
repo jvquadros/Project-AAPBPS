@@ -493,3 +493,89 @@ Objective:
 **Justification:** _pending team review_
 
 ---
+
+## Entry 015 — 2026-09-29 — AI-assisted refactoring cycle
+
+**Prompt type:** Refactoring, adapted from the course refactoring prompt (ST2 Course Project deck), with extra constraints added by the team (keep the dictionary structure and the processing logic); zero-shot
+**Goal:** Improve how the code is organized into functions, and its readability, without changing its behavior.
+
+**Prompt used:**
+```
+Review the following beginner-level Python code. Suggest refactoring improvements to organize the
+code into better functions and improve readability. Do not change the dictionary structure, the
+data processing logic, or introduce advanced concepts outside the beginner scope. Explain each
+suggestion. Code: main.py, calculations.py, validations.py (Trabalho/support-triage)
+```
+
+**How the AI checked:** it read the current files from the team's folder and applied all six suggestions to a scratch copy. The output was byte-for-byte identical to the current program for the 15 sample tickets and for an empty ticket list, and all files compiled. The team's files were not changed.
+
+**Relevant AI response (summary):**
+- **R1, `main()`:** move the loose program code at the bottom of `main.py` into a `main()` function, called once at the end. The file then reads as definitions plus one call, and the steps of the program are grouped in one place. The logic is unchanged.
+- **R2, `create_queue_counters()`:** move the counter set-up (a dictionary with one zero counter per queue) into a function that returns it, so the name explains what the loop is for.
+- **R3, `print_banner(title)` and `LINE_WIDTH`:** the three-line title banner is written twice and the number 50 appears six times; a function and a constant remove the repetition, so the width is changed in one place.
+- **R4, `format_deadline(deadline_hours)`:** move the "not set / N hours" decision out of `print_ticket_result()` into a function that returns the text, so the decision can be tested and the printing function only prints.
+- **R5, `calculate_percentage(count, total)` in `calculations.py`:** `print_summary()` currently calculates and prints. Moving the calculation out follows the project rule "a function that calculates does not print", makes it testable, and returns 0.0 when the total is 0.
+- **R6 (optional), `sample_tickets.py`:** move the 15-ticket list into its own module, so `main.py` only controls the program's execution, as in the course's project structure. Trade-off: one more file.
+- **Considered and not recommended:** a `process_tickets()` function that returns all the totals (it would need several return values at once, which is not course material, or a new dictionary); replacing the `total_tickets` counter with `len(tickets)` (it changes the processing logic, and the counter is ST2 content); `if __name__ == "__main__":` (standard in real projects, but not course material); changes to `validations.py` or to the rules in `calculations.py` (each function already has one responsibility).
+- If R4 and R5 are accepted, `TEST_CASES.md` needs direct tests for `format_deadline()` and `calculate_percentage()`.
+
+*Team review, given in the prompt of Entry 016:*
+**Accepted:** All six suggestions.
+- **R1:** the program's execution was moved into a `main()` function.
+- **R2:** the counter set-up was extracted into `create_queue_counters()`.
+- **R3:** `print_banner(title)` and the `LINE_WIDTH` constant replace the repeated banner and separator lines.
+- **R4:** `format_deadline(deadline_hours)` returns the deadline text, so `print_ticket_result()` only prints.
+- **R5:** `calculate_percentage(count, total)` was moved to `calculations.py`, so `print_summary()` no longer calculates.
+- **R6:** the mock tickets were moved into `sample_tickets.py`.
+- Direct tests for `format_deadline()` and `calculate_percentage()` were added to `TEST_CASES.md`.
+
+**Rejected:** None of the six suggestions. The alternatives the AI itself advised against (a `process_tickets()` function returning several values, replacing the `total_tickets` counter with `len(tickets)`, and the `if __name__ == "__main__":` guard) were not adopted.
+
+**Justification:** Moving the execution into a `main()` function (R1), extracting setup (R2) and display formatting (R3, R4) into helper functions, moving calculations out of print functions (R5), and separating the mock data into `sample_tickets.py` (R6) significantly improves modularity and readability. It adheres perfectly to clean code principles without altering the core logic, dictionary structures, or introducing advanced concepts outside the course scope.
+
+**Verification after applying:** the refactored program's output is byte-for-byte identical to the previous version (15 tickets and an empty ticket list), and all 56 test rows in `TEST_CASES.md` pass.
+
+---
+
+## Entry 016 — 2026-09-29 — Applying the refactoring accepted in the refactoring cycle
+
+**Prompt type:** Zero-shot, task execution on the team's accept/reject decisions (connected project folder)
+**Goal:** Apply R1–R6 from Entry 015, add the tests for the new functions, and draft the Entry 015 review text.
+
+**Team decisions supplied in the prompt (not made by the AI):** accept R1 to R6; the justification is recorded in Entry 015.
+
+**Prompt used:**
+```
+Context: Reviewing your refactoring suggestions.
+Decisions for the AI Log (Entry 015):
+
+R1 to R6: ACCEPT ALL.
+Justification: Moving the execution into a main() function (R1), extracting setup (R2) and
+display formatting (R3, R4) into helper functions, moving calculations out of print functions
+(R5), and separating the mock data into sample_tickets.py (R6) significantly improves modularity
+and readability. It adheres perfectly to clean code principles without altering the core logic,
+dictionary structures, or introducing advanced concepts outside the course scope.
+Objective:
+
+Apply R1-R6 to the codebase (creating sample_tickets.py and updating the others).
+
+Add the required direct tests for format_deadline and calculate_percentage in TEST_CASES.md.
+
+Provide the exact text for AI Log Entry 015 so I can paste it into the document.
+```
+
+**Relevant AI response (summary):**
+- `sample_tickets.py` (new): the 15 synthetic tickets, moved unchanged from `main.py`.
+- `main.py`: `from sample_tickets import tickets`; new functions `print_banner()`, `create_queue_counters()` and `format_deadline()`; a `LINE_WIDTH` constant replaces the six hard-coded widths; the program's steps are inside `main()`, which is called on the last line. The processing loop and the dictionaries are unchanged.
+- `calculations.py`: new `calculate_percentage(count, total)`, which returns 0.0 when the total is 0; the rule functions are unchanged. `validations.py` is unchanged.
+- `docs/TEST_CASES.md` v1.3: 9 new direct tests (FT22–FT25 for `format_deadline()`, FT26–FT30 for `calculate_percentage()`); run instructions updated, including the note that `from main import format_deadline` runs the program once first; coverage table and change log updated.
+- `docs/PROBLEM_ANALYSIS.md` v1.3: assumption 3 now names `sample_tickets.py`; no rule changes.
+- The accept/reject text for Entry 015, ready to paste.
+
+**Verification:** the program's output before and after the refactoring was compared byte for byte, for the 15 tickets and for an empty ticket list, and was identical. All 26 routing tests and 30 function tests passed. The files compile, use ASCII only, and contain no classes, comprehensions, lambdas, `__name__` guard or third-party imports.
+
+**Accepted:** _pending team review_
+**Rejected:** _pending team review_
+**Justification:** _pending team review_
+
+---
