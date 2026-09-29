@@ -7,15 +7,19 @@
 # AI disclosure (PUCPR Resolution 274/2024): During the preparation of this code,
 # the author(s) used Claude (Anthropic, model claude-opus-5) to write the mock
 # ticket list, the processing loop, the summary counters and the output
-# formatting. After using this tool, the author(s) reviewed and edited the
-# content as needed and take full responsibility for the content.
+# formatting, and to apply the corrections the team accepted in the AI
+# debugging cycle (AI log Entry 013). After using this tool, the author(s)
+# reviewed and edited the content as needed and take full responsibility for
+# the content.
 
 from validations import is_missing
 from calculations import route_ticket, QUEUES, STATUS_NEEDS_REVIEW, NO_DEADLINE
 
-# List of dictionaries: one dictionary per ticket, all with the same keys.
+# List of dictionaries: one dictionary per ticket.
 # All tickets are synthetic. Some values are messy on purpose, to show the
-# cleaning rule (BR0) and the unknown-value rules (BR3 and BR4).
+# cleaning rule (BR0) and the unknown-value rules (BR3 and BR4). Ticket 1015
+# has no "description" or "priority" key at all, to show that a missing field
+# does not crash the program.
 tickets = [
     {"ticket_id": 1001, "description": "Cannot log in to the VPN",
      "category": "Access", "priority": "High"},
@@ -45,6 +49,7 @@ tickets = [
      "category": "Access", "priority": None},
     {"ticket_id": 1014, "description": "Something is not working",
      "category": None, "priority": None},
+    {"ticket_id": 1015, "category": "Hardware"},
 ]
 
 
@@ -57,10 +62,12 @@ def show_value(value):
 
 def print_ticket_result(ticket, result):
     """Show the routing result of one ticket."""
+    # .get() returns None when a key is missing, and show_value() turns None into "(missing)"
     print("-" * 50)
-    print(f"Ticket {ticket['ticket_id']}: {ticket['description']}")
-    print(f"  Category: {show_value(ticket['category'])}  |  "
-          f"Priority: {show_value(ticket['priority'])}")
+    print(f"Ticket {show_value(ticket.get('ticket_id'))}: "
+          f"{show_value(ticket.get('description'))}")
+    print(f"  Category: {show_value(ticket.get('category'))}  |  "
+          f"Priority: {show_value(ticket.get('priority'))}")
     print(f"  Queue:    {result['queue']}")
     if result["deadline_hours"] == NO_DEADLINE:
         print("  Deadline: not set (priority must be reviewed)")
@@ -105,12 +112,13 @@ print("NEXOTECH SOLUTIONS - TICKET ROUTING")
 print("=" * 50)
 
 for ticket in tickets:
-    result = route_ticket(ticket["category"], ticket["priority"])
+    # .get() instead of ticket["..."]: a missing key gives None instead of a KeyError
+    result = route_ticket(ticket.get("category"), ticket.get("priority"))
     print_ticket_result(ticket, result)
 
     queue_counts[result["queue"]] = queue_counts[result["queue"]] + 1
     total_tickets = total_tickets + 1
     if result["status"] == STATUS_NEEDS_REVIEW:
-        needs_review_ids.append(ticket["ticket_id"])
+        needs_review_ids.append(ticket.get("ticket_id"))
 
 print_summary(queue_counts, total_tickets, needs_review_ids)

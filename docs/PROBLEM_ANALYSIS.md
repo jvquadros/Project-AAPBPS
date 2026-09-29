@@ -5,7 +5,7 @@
 | Project | Ticket routing system for NexoTech Solutions |
 | Course | AI-Assisted Python for Business Problem Solving (PSI163), PUCPR, 2026/2 |
 | Indicator | ID1.1: analyze an organizational problem, identify inputs, processing and outputs, and decompose it into logical steps |
-| Version | 1.1, 2026-09-29 (v1.0 approved by the team; v1.1 adds BR0, input cleaning; see section 7) |
+| Version | 1.2, 2026-09-29 (v1.0 approved by the team; v1.1 adds BR0; v1.2 marks unknown categories for review; see section 7) |
 
 ---
 
@@ -39,7 +39,7 @@ NexoTech's help desk receives support tickets and passes each one to one of four
 
 | Input | Processing | Output |
 |---|---|---|
-| A list of support tickets. Each ticket has: **ticket ID**, **description**, **category**, **priority** | 1. Read the ticket's fields.<br>2. Clean the category and priority: lowercase, no surrounding spaces (BR0).<br>3. Find the queue from the category (BR1, BR3).<br>4. Find the resolution deadline from the priority (BR2).<br>5. If the priority is not recognized, send the ticket to Triage with no deadline and mark it for review (BR4).<br>6. Count the ticket in its queue. | For each ticket: **queue**, **deadline (hours)**, **status**.<br>At the end: a **summary** of tickets per queue and the number of tickets needing review. |
+| A list of support tickets. Each ticket has: **ticket ID**, **description**, **category**, **priority** | 1. Read the ticket's fields.<br>2. Clean the category and priority: lowercase, no surrounding spaces (BR0).<br>3. Find the queue from the category. An unrecognized category goes to Triage and is marked for review (BR1, BR3).<br>4. Find the resolution deadline from the priority (BR2).<br>5. If the priority is not recognized, send the ticket to Triage with no deadline and mark it for review (BR4).<br>6. Count the ticket in its queue. | For each ticket: **queue**, **deadline (hours)**, **status**.<br>At the end: a **summary** of tickets per queue and the number of tickets needing review. |
 
 ### 2.1 Input fields
 
@@ -67,9 +67,9 @@ NexoTech's help desk receives support tickets and passes each one to one of four
 1. Load the list of tickets to process.
 2. Take the next ticket and read its ID, description, category and priority.
 3. **Clean** the category and priority: convert them to lowercase, remove surrounding spaces, and turn a missing value into empty text (BR0).
-4. Decide the **queue** from the category (BR1). An unrecognized category goes to Triage (BR3).
+4. Decide the **queue** from the category (BR1). An unrecognized category goes to **Triage** and is marked **"Needs review"** (BR3).
 5. Decide the **resolution deadline** from the priority (BR2).
-6. If the priority is not recognized, send the ticket to **Triage**, set **no deadline**, and mark it **"Needs review"** (BR4). Otherwise mark it **"Routed"**.
+6. If the priority is not recognized, send the ticket to **Triage**, set **no deadline**, and mark it **"Needs review"** (BR4). If neither BR3 nor BR4 applies, mark it **"Routed"**.
 7. Display the result for this ticket: ID, category, priority, queue, deadline, status.
 8. Add 1 to the count for the ticket's queue. If the ticket needs review, also record its ID in the "needs review" list.
 9. Repeat steps 2 to 8 until every ticket has been processed.
@@ -90,7 +90,7 @@ NexoTech's help desk receives support tickets and passes each one to one of four
 
 ### BR0: Input cleaning (applied first)
 
-Before any other rule runs, the category and priority are converted to **lowercase** and **surrounding spaces are removed**. A missing value becomes empty text. This means "Access", "access", "ACCESS" and " Access " are all the same category, and every rule below compares the cleaned values.
+Before any other rule runs, the category and priority are converted to **lowercase** and **surrounding spaces are removed**. A missing value, or a field that is absent from the ticket, becomes empty text. This means "Access", "access", "ACCESS" and " Access " are all the same category, and every rule below compares the cleaned values.
 
 ### BR1: Routing by category
 
@@ -117,7 +117,7 @@ A ticket must be resolved within a number of hours that depends on its priority.
 
 ### BR3: Unrecognized category
 
-If a ticket's category, after cleaning, is not one of the six listed in BR1 (including a missing category), it is treated like a General ticket and sent to **Triage**, where a person decides where it belongs.
+If a ticket's category, after cleaning, is not one of the six listed in BR1 (including a missing category), it is sent to **Triage** and marked **"Needs review"**, because a person must decide where it belongs. Its deadline still follows BR2. A ticket whose category is General also goes to Triage, but it is marked "Routed", because General is a recognized category.
 
 ### BR4: Unrecognized priority
 
@@ -125,7 +125,7 @@ If a ticket's priority, after cleaning, is not High, Medium or Low (including a 
 
 ### Status
 
-Every ticket that passes BR4 is marked **"Routed"**. A ticket caught by BR4 is marked **"Needs review"**.
+A ticket caught by BR3 (unrecognized category) or BR4 (unrecognized priority) is marked **"Needs review"**. Every other ticket is marked **"Routed"**.
 
 ---
 
@@ -150,8 +150,11 @@ START
         CALCULATE queue = "L2 Field Team"
     ELIF clean_category is "finance"
         CALCULATE queue = "Admin"
+    ELIF clean_category is "general"
+        CALCULATE queue = "Triage"
     ELSE
         CALCULATE queue = "Triage"
+        CALCULATE status = "Needs review"
     END IF
 
     IF clean_priority is "high"
@@ -178,7 +181,7 @@ END
 **Notes on the pseudocode**
 
 - **Cleaning (BR0).** The two cleaning steps run before any decision, so every comparison uses lowercase values. The original values are kept for display.
-- **Routing decision (BR1, BR3).** Four paths. The final ELSE covers both "General" and any unrecognized category, so every ticket always gets a queue.
+- **Routing decision (BR1, BR3).** Five paths. "General" goes to Triage as a normal ticket. The final ELSE covers any unrecognized or missing category: it sends the ticket to Triage and marks it for review, so every ticket always gets a queue.
 - **Deadline decision (BR2, BR4).** Four paths. The final ELSE handles an unrecognized priority. It overrides the queue with "Triage" and marks the ticket for review, so BR4 is applied in one single place.
 - **Repetition.** The whole block runs once for each ticket in the list (steps 2 to 9 of section 3.1). The counts per queue and the final summary (steps 8 and 10) sit around this block. In Python they become a `for` loop with counters, which is ST2 content.
 - **Decision values.** Each branch of both decisions will be tested with at least three different input values in `docs/TEST_CASES.md`.
@@ -199,7 +202,8 @@ END
 |---|---|---|
 | 1.0 | 2026-09-29 | First version. Approved by the team, including BR3, BR4, the status field, the end-of-run summary and the single-ticket pseudocode. |
 | 1.1 | 2026-09-29 | Added BR0 (input cleaning): capitalization and surrounding spaces are ignored. Pseudocode, IPO table and decomposition updated to match. Team decision. |
+| 1.2 | 2026-09-29 | BR3 now marks an unrecognized category "Needs review"; BR0 also covers a field that is absent from the ticket. Pseudocode, decomposition and status rule updated. Team decisions from the AI debugging cycle (AI log Entry 013). |
 
 ---
 
-*During the preparation of this document, the author(s) used Claude (Anthropic, model claude-opus-5) to structure the problem analysis (guiding questions, IPO table, decomposition, business rules and pseudocode) from the business rules defined by the team, to propose the handling of unrecognized categories and priorities (BR3, BR4), and to write the input cleaning rule (BR0) requested by the team. After using this tool, the author(s) reviewed and edited the content as needed and take full responsibility for the content.*
+*During the preparation of this document, the author(s) used Claude (Anthropic, model claude-opus-5) to structure the problem analysis (guiding questions, IPO table, decomposition, business rules and pseudocode) from the business rules defined by the team, to propose the handling of unrecognized categories and priorities (BR3, BR4), to write the input cleaning rule (BR0) requested by the team, and to apply the rule changes the team accepted in the AI debugging cycle. After using this tool, the author(s) reviewed and edited the content as needed and take full responsibility for the content.*

@@ -402,3 +402,94 @@ based on our recent work (Python files, docs, AI log, and .gitignore).
 **Justification:** _pending team review_
 
 ---
+
+## Entry 013 — 2026-09-29 — AI-assisted debugging cycle (course pattern)
+
+**Prompt type:** Debugging, using the mandatory course prompt from the ST2 Course Project deck (zero-shot)
+**Goal:** Review the approved code for syntax errors, logic errors and input validation problems.
+
+**Prompt used:**
+```
+Review the following beginner-level Python code.
+Identify possible syntax errors, logic errors, and input validation problems.
+Do not rewrite the entire code unless necessary.
+Explain each problem and each suggested correction.
+Code: main.py, calculations.py, validations.py (Trabalho/support-triage)
+```
+
+**How the AI checked:** it read the current files from the team's folder, compiled them, and reproduced every problem on a scratch copy before reporting it. The team's files were not changed.
+
+**Relevant AI response (summary):**
+- **Syntax:** none; all three files compile and run.
+- **P1, input validation (high):** a ticket dictionary with a missing key crashes the program. `main.py` line 108 raised `KeyError: 'priority'`, and lines 61–63 and 114 have the same pattern. The existing handling covers `None` values, not absent keys. Suggested correction: read the fields with `ticket.get("priority")`, which returns `None`, so `clean_text()` handles it; add a test for a ticket without a priority key.
+- **P2, input validation (low):** a missing description prints `None` (`main.py` line 61). Suggested correction: `show_value(ticket.get("description"))`.
+- **P3, logic (medium; needs a team rule):** a duplicate ticket ID is processed and counted twice. With a second ticket 1001 added, the summary showed L1 = 5 and total = 15. Suggested correction, if the team adds a rule: keep a set of the IDs already seen, skip and report duplicates, and update the analysis and tests.
+- **P4, logic / rule consistency (question for the team):** an unknown category (ticket 1011, "Printer") gets status "Routed" and is not counted under "Needs review", although BR3 says a person must decide where it belongs. Options: keep it and document that "Needs review" only means a missing priority, or also mark unknown categories "Needs review" (this changes TC19–TC21 and the summary to 4 tickets needing review).
+- **P5, input validation pitfall (low):** `get_queue("Access")` returns "Triage" and `get_deadline_hours("High")` returns 0, because both expect cleaned text. The program itself is not affected, because `route_ticket()` always cleans first, but a teammate testing these two functions directly would get misleading results. Options: test them with lowercase values and say so in the tests, or call `clean_text()` inside both functions.
+- **Checked and fine:** the empty-list guard; spaces, tabs and newlines; numbers or `True` as values (treated as unknown); typos such as "Hight" (sent to Needs review); percentages add up to 100%; the queue counter cannot receive an unknown queue.
+- **Test coverage note:** `TEST_CASES.md` tests only `route_ticket()`, but the ST2 deck asks for every function to be tested with different inputs. Add direct rows for `clean_text()`, `is_missing()`, `get_queue()` and `get_deadline_hours()`.
+
+*Team review, given in the prompt of Entry 014:*
+**Accepted:**
+- **P1 (missing field crashes the program):** fields are now read with `.get()`, so an absent key becomes `None` and is handled by `clean_text()`. It is a solid, defensive practice that prevents `KeyError`.
+- **P2 (missing description):** the description now goes through `show_value()`, so a missing one prints "(missing)" instead of "None". Reusing the existing function improves the output.
+- **P4, option 2 (unknown category):** an unrecognized category is now marked "Needs review". It makes business sense: a person has to decide where these tickets belong. BR3 and the logic were updated.
+- **P5, option 2 (helper functions):** `get_queue()` and `get_deadline_hours()` now call `clean_text()` themselves, so each function is robust when it is tested on its own.
+- **Test coverage note:** direct test rows were added for `clean_text()`, `is_missing()`, `get_queue()` and `get_deadline_hours()`, for full coverage.
+
+**Rejected:**
+- **P3 (duplicate tickets):** no rule BR5 and no set to track duplicate ticket IDs.
+
+**Justification:** P3 was rejected because this ST1/ST2 delivery uses a controlled, hard-coded list of dictionaries, so duplicate IDs are not a runtime risk; the team prioritized simplicity and strict adherence to the current scope. The accepted corrections improve robustness (P1, P5), output quality (P2), business consistency (P4) and test coverage, without adding concepts outside the ST1/ST2 scope.
+
+---
+
+## Entry 014 — 2026-09-29 — Applying the corrections accepted in the debugging cycle
+
+**Prompt type:** Zero-shot, task execution on the team's accept/reject decisions (connected project folder)
+**Goal:** Apply the corrections the team accepted in Entry 013, update the analysis and the tests, and draft the Entry 013 review text.
+
+**Team decisions supplied in the prompt (not made by the AI):** accept P1, P2, P4 (option 2), P5 (option 2) and the extra function tests; reject P3. The reasons are recorded in Entry 013.
+
+**Prompt used:**
+```
+Context: Reviewing your debugging suggestions. I have decided what to accept and reject.
+Decisions for the AI Log (Entry 013):
+
+* Bug 1 (Missing field crashes): ACCEPT. Using `.get()` is a solid, defensive programming
+  practice to prevent KeyErrors.
+* Bug 2 (Missing description): ACCEPT. Reusing `show_value()` improves the output aesthetics.
+* Bug 3 (Duplicate tickets): REJECT. We will not introduce BR5 or `sets` for tracking
+  duplicates. Since we are using a controlled, hardcoded list of dictionaries for this ST1/ST2
+  delivery, duplicate IDs are not a runtime risk. We are prioritizing simplicity and adhering
+  strictly to the current scope.
+* Bug 4 (Unknown category review): ACCEPT (Option 2). It makes business sense that unknown
+  categories flag a "Needs review" status. Please update BR3 and the logic accordingly.
+* Bug 5 (Helper functions uncleaned inputs): ACCEPT (Option 2). Adding `clean_text()` inside
+  the helper functions makes them robust for independent testing.
+* Extra Tests: ACCEPT. Please add the missing direct rows in `TEST_CASES.md` for the individual
+  functions to ensure full coverage.
+
+Objective:
+
+1. Apply the accepted code corrections to `main.py` and `calculations.py`.
+2. Update the `PROBLEM_ANALYSIS.md` (for the BR3 change) and `TEST_CASES.md` (for the new
+   expected results and new function tests).
+3. Draft the exact text for AI Log Entry 013 containing these accept/reject justifications so
+   I can paste it into the document.
+```
+
+**Relevant AI response (summary):**
+- `main.py`: every ticket field is read with `.get()` (the `route_ticket()` call, the output and the needs-review list); the description and ticket ID are shown through `show_value()`. Ticket 1015 was added with no `description` and no `priority` key, to show that a missing field no longer crashes the program.
+- `calculations.py`: `get_queue()` and `get_deadline_hours()` call `clean_text()` themselves. `route_ticket()` now has an `if`/`elif`/`else` status decision: BR4 first, then BR3 (queue is Triage and the category is not "general" → "Needs review"), otherwise "Routed". `validations.py` is unchanged.
+- `docs/PROBLEM_ANALYSIS.md` v1.2: BR3 marks an unrecognized category "Needs review"; BR0 also covers an absent field; the status rule, decomposition and pseudocode were updated (the routing decision now has five paths); change log updated.
+- `docs/TEST_CASES.md` v1.2: TC19–TC21 now expect "Needs review"; 21 direct function tests added (FT01–FT21); summary check updated for 15 tickets (L1 4, L2 3, Admin 2, Triage 6; 5 needing review); change log added.
+- The accept/reject text for Entry 013, ready to paste.
+
+**Verification:** all 26 routing tests and 21 function tests were run against the new code and matched their expected results; `main.py` ran without errors and its output matched section 5 of the tests; the pseudocode's logic was simulated and matched `route_ticket()` for 54 category/priority combinations; the files compile, use ASCII only and contain no classes, comprehensions, lambdas or third-party imports.
+
+**Accepted:** _pending team review_
+**Rejected:** _pending team review_
+**Justification:** _pending team review_
+
+---

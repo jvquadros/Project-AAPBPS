@@ -5,9 +5,10 @@
 #
 # AI disclosure (PUCPR Resolution 274/2024): During the preparation of this code,
 # the author(s) used Claude (Anthropic, model claude-opus-5) to implement the
-# team's routing and deadline rules (BR1 to BR4) as functions. After using this
-# tool, the author(s) reviewed and edited the content as needed and take full
-# responsibility for the content.
+# team's routing and deadline rules (BR1 to BR4) as functions, and to apply the
+# corrections the team accepted in the AI debugging cycle (AI log Entry 013).
+# After using this tool, the author(s) reviewed and edited the content as needed
+# and take full responsibility for the content.
 
 from validations import clean_text
 
@@ -29,15 +30,18 @@ NO_DEADLINE = 0
 
 
 def get_queue(category):
-    """Return the queue for a cleaned category (BR1).
+    """Return the queue for a category (BR1).
 
     Any category that is not recognized goes to Triage (BR3).
     """
-    if category == "access" or category == "software":
+    # BR0 runs here too, so this function also works when it is tested on its own
+    clean_category = clean_text(category)
+
+    if clean_category == "access" or clean_category == "software":
         return L1_HELPDESK
-    elif category == "infrastructure" or category == "hardware":
+    elif clean_category == "infrastructure" or clean_category == "hardware":
         return L2_FIELD_TEAM
-    elif category == "finance":
+    elif clean_category == "finance":
         return ADMIN
     else:
         # "general", plus any unrecognized or missing category (BR3)
@@ -45,16 +49,19 @@ def get_queue(category):
 
 
 def get_deadline_hours(priority):
-    """Return the resolution deadline in hours for a cleaned priority (BR2).
+    """Return the resolution deadline in hours for a priority (BR2).
 
     An unknown priority returns NO_DEADLINE instead of a default value,
     because a wrong default could delay an urgent ticket (BR4).
     """
-    if priority == "high":
+    # BR0 runs here too, so this function also works when it is tested on its own
+    clean_priority = clean_text(priority)
+
+    if clean_priority == "high":
         return 4
-    elif priority == "medium":
+    elif clean_priority == "medium":
         return 24
-    elif priority == "low":
+    elif clean_priority == "low":
         return 72
     else:
         return NO_DEADLINE
@@ -62,16 +69,18 @@ def get_deadline_hours(priority):
 
 def route_ticket(category, priority):
     """Apply BR0 to BR4 to one ticket and return its queue, deadline and status."""
-    # BR0 runs first, so "ACCESS", "access" and " Access " are treated the same
+    # Needed below to tell a "general" ticket apart from an unrecognized category
     clean_category = clean_text(category)
-    clean_priority = clean_text(priority)
 
-    queue = get_queue(clean_category)
-    deadline_hours = get_deadline_hours(clean_priority)
+    queue = get_queue(category)
+    deadline_hours = get_deadline_hours(priority)
 
     if deadline_hours == NO_DEADLINE:
         # BR4: a person must set the priority before anyone works on the ticket
         queue = TRIAGE
+        status = STATUS_NEEDS_REVIEW
+    elif queue == TRIAGE and clean_category != "general":
+        # BR3: the category was not recognized, so a person must decide where it belongs
         status = STATUS_NEEDS_REVIEW
     else:
         status = STATUS_ROUTED
