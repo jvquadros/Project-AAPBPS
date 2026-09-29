@@ -1,7 +1,7 @@
 # AI Interaction Log
 **Course:** AI-Assisted Python for Business Problem Solving (PSI163) — PUCPR, 2026/2
 **Professor:** Evandro Alberto Zatti
-**Student:** João Vitor da Silva de Quadros (Yuri)
+**Student:** João Vitor da Silva de Quadros
 **AI tool:** Claude (Anthropic), model `claude-opus-5`, via Claude Cowork
 **Log started:** 2026-09-18
 
