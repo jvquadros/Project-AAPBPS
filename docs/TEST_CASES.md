@@ -253,6 +253,17 @@ Fill in one row per failed test. After the fix, re-run the test and record the r
 
 **Team verification.** Before the submission, at least one team member should re-run a sample of these tests on their own computer, following section 2 (suggested: TC16, TC22, FT25, FT30, MT02 and MT04), and confirm that the results are the same. Record the result below.
 
+| Date | Team member | Tests re-run | Same results? | Results |
+|---|---|---|---|---|
+| 2026-10-16 | Marlon Zanelato Filho | TC16 | Yes | Ticket 1016: ACCESS Category: Access Priority: low;Queue: L1 Helpdesk Deadline: 72 hours Status: Routed |
+| 2026-10-16 | Marlon Zanelato Filho | TC22 | Yes | Ticket 1016: (missing) Category: Access Priority: Urgent Queue: Triage Deadline: not set (priority must be reviewed) Status: Needs review |
+| 2026-10-16 | Marlon Zanelato Filho | FT25 | Yes | the command used before main() was format_deadline(4); Ticket 1016: ACCESS Category: Access Priority: low Queue: L1 Helpdesk Deadline: 72 hours Status: Routed |
+| 2026-10-16 | Marlon Zanelato Filho | FT30 | Yes | the printed result was 0.0 |
+| 2026-10-16 | Marlon Zanelato Filho | MT02 | Yes | Ticket 1016: (missing) Category: access Priority: HIGH Queue: L1 Helpdesk Deadline: 4 hours Status: Routed |
+| 2026-10-16 | Marlon Zanelato Filho | MT04 | Yes | Add a ticket manually? (yes/no): maybe Please answer yes or no. |
+
+all tests were done restarting the program to see if the changes done would save on the file
+
 | Date | Team member | Tests re-run | Same results? |
 |---|---|---|---|
 | 10-17-2026 | Wesley Lopes | TC16 | yes |
